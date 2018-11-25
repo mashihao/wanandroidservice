@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link rel="stylesheet"
+          href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Logger</title>
+
+    <style>
+        .wrapper {
+            margin: 20px;
+            width: 95%; /* 也可以固定宽度 */
+            height: 700px;
+        }
+
+        .div1 {
+            margin-left: 20px;
+            overflow: auto;
+            display: inline-block; /* 如需支持IE8以下版本，用浮动来做 */
+            width: calc(100% / 3.09); /* 此处运用了一个css3的表达式，将div三等分，IE8及以上可以支持，当然也可以根据需要设置固定值 */
+            width: -webkit-calc(100% / 3.09); /*3.09 排除margin的宽度*/
+            width: -moz-calc(100% / 3.09);
+            height: 100%;
+        }
+        .div2 {
+            float: right;
+            display: inline-block; /* 如需支持IE8以下版本，用浮动来做 */
+            width: calc(100% / 3.09 * 2); /* 此处运用了一个css3的表达式，将div三等分，IE8及以上可以支持，当然也可以根据需要设置固定值 */
+            width: -webkit-calc(100% / 3.09 * 2); /*3.09 排除margin的宽度*/
+            width: -moz-calc(100% / 3.09 * 2);
+            height: 500px;
+
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="wrapper">
+
+    <div class="div1" >
+
+        <a href="#" class="list-group-item active">
+            免费域名注册
+        </a>
+
+        <div id="left_list"></div>
+    </div>
+
+    <div class="div2">
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title" >面板标题</h3>
+            </div>
+            <div class="panel-body" id="right_show">
+                这是一个基本的面板
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    window.onload = function () {
+        // alert("绑定成功！");
+        var datas = new Array()
+        for (var i = 0; i < 10; i++) {
+            var obj = new Object()
+            obj.id = i
+            obj.name = "data--->" + i
+            datas[i] = obj
+        }
+
+        var div1 = document.getElementById("left_list")
+
+        for (var i = 0; i < datas.length; i++) {
+            var divItem = document.createElement("div")
+            divItem.id = i
+            divItem.className = "list-group-item"
+            var p = document.createElement("p")
+            var a1 = document.createElement("a")
+            a1.innerText = datas[i].name
+            p.innerText = datas[i].id
+            divItem.appendChild(p)
+            divItem.appendChild(a1)
+            divItem.onclick = function (ev) {
+                document.getElementById("right_show").innerText = datas[this.id].name
+            }
+
+            if (div1.children == null || div1.children.length == 0) {
+                div1.appendChild(divItem);
+            } else {
+                div1.insertBefore(divItem, div1.firstChild);
+            }
+        }
+    }
+</script>
+</html>
