@@ -22,7 +22,7 @@ public class WanandroidserviceApplication {
         try {
             String ip = InetAddress.getLocalHost().getHostAddress();
             int port = socketServer.getPort();
-            System.out.println(String.format("服务已启动: %s:%d", ip, port));
+//            System.out.println(String.format("服务已启动: %s:%d", ip, port));
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }

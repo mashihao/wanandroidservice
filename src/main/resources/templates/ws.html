@@ -10,6 +10,8 @@
     <link rel="stylesheet" type="text/css" href="themes/icon.css"/>
     <script th:src="@{js/jquery.min.js}"></script>
     <script th:src="@{js/jquery.easyui.min.js}"></script>
+    <script src="https://cdn.bootcss.com/jsoneditor/5.26.3/jsoneditor.js"></script>
+    <link href="https://cdn.bootcss.com/jsoneditor/5.26.3/jsoneditor.css" rel="stylesheet"/>
     <link rel="stylesheet"
           href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css"/>
 
@@ -32,8 +34,16 @@
 </div>
 
 
-<div id="right_show" data-options="region:'center',title:'详情'" style="padding:5px;">
-    这是一个基本的面板
+<div data-options="region:'center',title:'数据'" style="padding:0px;">
+    <div class="easyui-tabs" fit="true">
+        <div id="right_show" title="详情" style="padding:10px; margin: 20px">
+            这里面显示详情
+        </div>
+        <div id="request_id" title="Request数据Json" style="padding:10px;">
+        </div>
+        <div id="response_id" title="Response数据Json" style="padding:10px;">
+        </div>
+    </div>
 </div>
 
 
@@ -42,6 +52,17 @@
 
     var datas = new Array()
     var socket = null
+    var devices = new Array()
+    var options = {
+        mode: 'view',
+        modes: ['text', 'code', 'view'],
+        onEditable: function (node) {
+            return false;
+        }
+    };
+
+    var response_json = document.getElementById("response_id")
+    var response_editor = new JSONEditor(response_json, options);
 
     /**
      *设置已经连接
@@ -69,22 +90,28 @@
     }
 
     function showMsg(data) {
+
+//        if ($.inArray(datas[this.id].device, devices) == -1) {
+//            devices.add(datas[this.id].device, devices)
+//        }
+
         console.log(data)
         var div1 = document.getElementById("left_list")
 
-        var divItem = document.createElement("div")
+        var divItem = document.createElement("a")
         divItem.id = datas.length - 1
         divItem.className = "list-group-item"
-        var p = document.createElement("p")
-        var a1 = document.createElement("a")
-        a1.innerText = datas[datas.length - 1].url
-        p.innerText = datas[datas.length - 1].method
-        divItem.appendChild(p)
-        divItem.appendChild(a1)
+        divItem.href = "#"
+        divItem.innerText = datas[datas.length - 1].method + "\n" + datas[datas.length - 1].url
+
+
         divItem.onclick = function (ev) {
             document.getElementById("right_show").innerText =
-                datas[this.id].method + "\n" + datas[this.id].url + "\n" + datas[this.id].responseBody + "\n" + datas[this.id].requestBody + "\n"
+                datas[this.id].device + "\n" + datas[this.id].method + "\n" + datas[this.id].url + "\n" + datas[this.id].responseBody + "\n" + datas[this.id].requestBody + "\n"
+
+            response_editor.set($.parseJSON(datas[this.id].responseBody))
         }
+
 
         if (div1.children == null || div1.children.length == 0) {
             div1.appendChild(divItem);
