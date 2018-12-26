@@ -1,5 +1,5 @@
 <!--suppress ALL -->
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8"/>
     <title>广播式WebSocket</title>
@@ -27,6 +27,10 @@
     <button id="connect" onclick="connect();">连接</button>
     <button id="disconnect" disabled="disabled" onclick="disconnect();">断开连接</button>
     <button onclick="clear2();">清除日志</button>
+
+    <select id="list" style="width:400px;">
+
+    </select>
 </div>
 
 
@@ -51,6 +55,7 @@
     var stompClient = null;
 
     var datas = new Array()
+    var temp_datas = new Array()
     var socket = null
     var devices = new Array()
     var options = {
@@ -83,19 +88,20 @@
             setConnected(true)
         }
         socket.onmessage = function (evt) {
-            console.log(evt.data)
-            datas.push(JSON.parse(evt.data))
-            showMsg(JSON.parse(evt.data))
+
+            var data = JSON.parse(evt.data);
+
+            datas.push(data)
+            showMsg()
+
+            if ($.inArray(data.device, devices) == -1) {
+                devices.push(data.device)
+                $(list).append('<option value=' + data.device + '>' + data.device + ' </option>');
+            }
         }
     }
 
-    function showMsg(data) {
-
-//        if ($.inArray(datas[this.id].device, devices) == -1) {
-//            devices.add(datas[this.id].device, devices)
-//        }
-
-        console.log(data)
+    function showMsg() {
         var div1 = document.getElementById("left_list")
 
         var divItem = document.createElement("a")
@@ -139,10 +145,32 @@
     //发送 消息 通过短链接. 发送到  welcome 接口
     function sendName() {
         var name = $('#name').val();
-        console.log('name:' + name);
         stompClient.send("/app/welcome", {}, JSON.stringify({'name': name}));
     }
 
+    // select option  选择事件
+    $(list).change(function () {
+
+        //清除数据
+        clear2()
+
+        //var options=$("select#test option:selected"); //可以获取到选中的option
+        var options = $(this).children("option:selected"); //也可以获取到选中的option
+        //alert(options.val());   //拿到选中项的值
+        //alert(options.text());   //拿到选中项的文本
+        var texts = options.text();
+        //https://blog.csdn.net/xionghui2007/article/details/78760464
+        /* <![CDATA[ */
+        for (var i = 0; i < datas.length; i++) {
+            if (datas[i].device != texts) {
+                datas.splice(i, 1);
+            }
+        }
+        /* ]]> */
+        showMsg()
+
+
+    });
 
 </script>
 </body>
