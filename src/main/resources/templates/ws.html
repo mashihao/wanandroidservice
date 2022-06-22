@@ -1,5 +1,6 @@
 <!--suppress ALL -->
 <html lang="en">
+
 <head>
     <meta charset="UTF-8"/>
     <title>广播式WebSocket</title>
@@ -12,8 +13,7 @@
     <script th:src="@{js/jquery.easyui.min.js}"></script>
     <script src="https://cdn.bootcss.com/jsoneditor/5.26.3/jsoneditor.js"></script>
     <link href="https://cdn.bootcss.com/jsoneditor/5.26.3/jsoneditor.css" rel="stylesheet"/>
-    <link rel="stylesheet"
-          href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css"/>
 
     <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -21,12 +21,15 @@
 
 
 <body onload="connect()" class="easyui-layout">
-<noscript><h2 style="color: #e80b0a;">Sorry，浏览器不支持WebSocket</h2></noscript>
+<noscript>
+    <h2 style="color: #e80b0a;">Sorry，浏览器不支持WebSocket</h2>
+</noscript>
 
 <div data-options="region:'north',title:'选项',split:true" style="height:100px;">
     <button id="connect" onclick="connect();">连接</button>
     <button id="disconnect" disabled="disabled" onclick="disconnect();">断开连接</button>
     <button onclick="clear2();">清除日志</button>
+
 
     <select id="list" style="width:400px;">
 
@@ -52,126 +55,153 @@
 
 
 <script type="text/javascript">
-    var stompClient = null;
+        var stompClient = null;
 
-    var datas = new Array()
-    var temp_datas = new Array()
-    var socket = null
-    var devices = new Array()
-    var options = {
-        mode: 'view',
-        modes: ['text', 'code', 'view'],
-        onEditable: function (node) {
-            return false;
+        var datas = new Array()
+        var temp_datas = new Array()
+        var socket = null
+        var devices = new Array()
+        var options = {
+            mode: 'view',
+            modes: ['text', 'code', 'view'],
+            onEditable: function (node) {
+                return false;
+            }
+        };
+
+        var response_json = document.getElementById("response_id")
+        var response_editor = new JSONEditor(response_json, options);
+
+        /**
+         *设置已经连接
+         * @param connected
+         */
+        function setConnected(connected) {
+            document.getElementById("connect").disabled = connected;
+            document.getElementById("disconnect").disabled = !connected;
+            $("#response").html();
         }
-    };
 
-    var response_json = document.getElementById("response_id")
-    var response_editor = new JSONEditor(response_json, options);
-
-    /**
-     *设置已经连接
-     * @param connected
-     */
-    function setConnected(connected) {
-        document.getElementById("connect").disabled = connected;
-        document.getElementById("disconnect").disabled = !connected;
-        $("#response").html();
-    }
-
-    function connect() {
+        function connect() {
 
 
-        //长连接  连接  endopointSang
-        socket = new WebSocket('ws://192.168.3.34:2017');
-        socket.onopen = function () {
-            setConnected(true)
-        }
-        socket.onmessage = function (evt) {
+            //长连接  连接  endopointSang
+            socket = new WebSocket('ws://10.1.30.131:2017');
+            socket.onopen = function () {
+                setConnected(true)
+            }
+            socket.onmessage = function (evt) {
 
-            var data = JSON.parse(evt.data);
+                var data = JSON.parse(evt.data);
 
-            datas.push(data)
-            showMsg()
 
-            if ($.inArray(data.device, devices) == -1) {
-                devices.push(data.device)
-                $(list).append('<option value=' + data.device + '>' + data.device + ' </option>');
+                if (selectOption == "" || selectOption == undefined || data.device.trim() == selectOption.trim()) {
+
+                    datas.push(data)
+                    showMsg()
+
+                }
+
+
+
+                if ($.inArray(data.device, devices) == -1) {
+                    devices.push(data.device)
+                    $(list).append('<option value=' + data.device + '>' + data.device + ' </option>');
+                }
             }
         }
-    }
 
-    function showMsg() {
-        var div1 = document.getElementById("left_list")
-
-        var divItem = document.createElement("a")
-        divItem.id = datas.length - 1
-        divItem.className = "list-group-item"
-        divItem.href = "#"
-        divItem.innerText = datas[datas.length - 1].method + "\n" + datas[datas.length - 1].url
+        function showMsg() {
 
 
-        divItem.onclick = function (ev) {
-            document.getElementById("right_show").innerText =
-                datas[this.id].device + "\n" + datas[this.id].method + "\n" + datas[this.id].url + "\n" + datas[this.id].responseBody + "\n" + datas[this.id].requestBody + "\n"
 
-            response_editor.set($.parseJSON(datas[this.id].responseBody))
-        }
+            var div1 = document.getElementById("left_list")
+
+            var divItem = document.createElement("a")
+            divItem.id = datas.length - 1
+            divItem.className = "list-group-item"
+            divItem.href = "#"
+
+            if (selectOption == "" || selectOption == undefined || datas[datas.length - 1].device.trim() == selectOption.trim()) {
+
+                divItem.innerText = datas[datas.length - 1].method + "\n" + datas[datas.length - 1].url.split("?")[0]
+            }
 
 
-        if (div1.children == null || div1.children.length == 0) {
-            div1.appendChild(divItem);
-        } else {
-            div1.insertBefore(divItem, div1.firstChild);
-        }
-    }
 
-    function disconnect() {
 
-        if (socket != null) {
-            socket.onclose
-        }
+            divItem.onclick = function (ev) {
+                document.getElementById("right_show").innerText =
+                    datas[this.id].device + "\n" + datas[this.id].method + "\n" + datas[this.id].url + "\n" + datas[this.id].responseBody + "\n" + datas[this.id].requestBody + "\n"
 
-        setConnected(false);
-        console.log('Disconnected');
-    }
+                response_editor.set($.parseJSON(datas[this.id].responseBody))
+            }
 
-    function clear2() {
-        document.getElementById("left_list").innerText = ""
-        document.getElementById("right_show").innerText = ""
 
-    }
+            if (div1.children == null || div1.children.length == 0) {
 
-    //发送 消息 通过短链接. 发送到  welcome 接口
-    function sendName() {
-        var name = $('#name').val();
-        stompClient.send("/app/welcome", {}, JSON.stringify({'name': name}));
-    }
+                div1.appendChild(divItem);
 
-    // select option  选择事件
-    $(list).change(function () {
+            } else {
 
-        //清除数据
-        clear2()
+                div1.insertBefore(divItem, div1.firstChild);
 
-        //var options=$("select#test option:selected"); //可以获取到选中的option
-        var options = $(this).children("option:selected"); //也可以获取到选中的option
-        //alert(options.val());   //拿到选中项的值
-        //alert(options.text());   //拿到选中项的文本
-        var texts = options.text();
-        //https://blog.csdn.net/xionghui2007/article/details/78760464
-        /* <![CDATA[ */
-        for (var i = 0; i < datas.length; i++) {
-            if (datas[i].device != texts) {
-                datas.splice(i, 1);
             }
         }
-        /* ]]> */
-        showMsg()
+
+        function disconnect() {
+
+            if (socket != null) {
+                socket.onclose
+            }
+
+            setConnected(false);
+            console.log('Disconnected');
+        }
+
+        function clear2() {
+            document.getElementById("left_list").innerText = ""
+            document.getElementById("right_show").innerText = ""
+
+        }
+
+        //发送 消息 通过短链接. 发送到  welcome 接口
+        function sendName() {
+            var name = $('#name').val();
+            stompClient.send("/app/welcome", {}, JSON.stringify({ 'name': name }));
+        }
+
+        var selectOption = ""
+
+        // select option  选择事件
+        $(list).change(function () {
+
+            //清除数据
+            clear2()
+
+            //var options=$("select#test option:selected"); //可以获取到选中的option
+            var options = $(this).children("option:selected"); //也可以获取到选中的option
+            //alert(options.val());   //拿到选中项的值
+
+            selectOption = options.text();
+
+            var texts = options.text();
+            //https://blog.csdn.net/xionghui2007/article/details/78760464
+            /* <![CDATA[ */
+            for (var i = 0; i < datas.length; i++) {
+                if (datas[i].device != texts) {
+                    datas.splice(i, 1);
+                }
+            }
+            datas = new Array()
+            /* ]]> */
+            // showMsg()
 
 
-    });
+        });
+
 
 </script>
 </body>
+
 </html>
